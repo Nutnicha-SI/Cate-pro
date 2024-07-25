@@ -64,24 +64,30 @@ class CategoryController extends SearchableController
 
         // Get the search parameters
         $data = $request->getQueryParams();
-        
+        $term = $data['term'] ?? null;
+        $minPrice = isset($data['min_price']) ? (float) $data['min_price'] : null;
+        $maxPrice = isset($data['max_price']) ? (float) $data['max_price'] : null;
+
         // Fetch products based on category
         $products = $this->getProductsByCategory($code);
+        $products = $this->prepareCategory($products);
+        $products = $this->filterByTerm($products, $term, $minPrice, $maxPrice);
 
-        // Prepare the category view with search functionality
         return view('categories.view', [
             'title' => "{$this->title} : {$category['name']}",
-            'term' => $data['term'] ?? '',
+            'term' => $term,
+            'min_price' => $data['min_price'] ?? '',
+            'max_price' => $data['max_price'] ?? '',
             'category' => $category,
             'products' => $products,
         ]);
     }
 
-        // Implement this method to return products based on the category code
-        // For demonstration, returning dummy products
-        private function getProductsByCategory(string $categoryCode): array
-        {
-            return ProductController::ITEMS; // This can be updated to fetch products based on the category code.
-        }
+    // Implement this method to return products based on the category code
+    private function getProductsByCategory(string $categoryCode): array
+    {
+        return array_filter(ProductController::ITEMS, function ($product) use ($categoryCode) {
+            return in_array($categoryCode, $product['categories']);
+        });
     }
-
+}

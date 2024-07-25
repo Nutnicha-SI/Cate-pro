@@ -12,7 +12,9 @@
 
     @php
         // Display all products data before foreach
-        dump($products);
+        //dump($products)
+        $categoryMap = ["PHP" => "CT001", "Javascript" => "CT002", "Typescript" => "CT003", "Python"=> "CT004"];
+
     @endphp
 
     <table class="app-cmp-data-list">
@@ -26,20 +28,29 @@
         </thead>
         <tbody>
             @foreach($products as $product)
+            @php
+                $productNameLower = strtolower($product['name']);
+                $categoryNameLower = strtolower($category['name']);
+                $position = strpos($productNameLower, $categoryNameLower);
+            @endphp
+                @if($position !== false)
                 <tr>
                     <td>{{ $product['code'] ?? 'N/A' }}</td>
                     <td>{{ $product['name'] ?? 'Unknown' }}</td>
                     <td>
                         @if(is_array($product['categories']) && !empty($product['categories']))
-                            @foreach($product['categories'] as $category)
-                                {{ $category['name'] ?? '' }}&nbsp;
+                            @foreach($product['categories'] as $c)
+                                @php
+                                    $link = $categoryMap[$c['name']];
+                                @endphp
+                                <a href="{{ $link }}">{{ $c['name'] ?? '' }}</a>&nbsp;
                             @endforeach
                         @endif
                     </td>
                     <td class="number">{{ number_format($product['price'] ?? 0, 2) }}</td>
                 </tr>
+                @endif
             @endforeach
         </tbody>
     </table>
 @endsection
-๓
